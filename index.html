@@ -15,7 +15,7 @@
   <div id="penaltyOverlay" class="fixed inset-0 bg-red-900 bg-opacity-95 z-50 flex flex-col items-center justify-center text-white hidden p-6 text-center">
     <div class="bg-red-800 p-8 rounded-2xl shadow-2xl max-w-lg w-full border-4 border-red-500">
       <h2 class="text-3xl font-extrabold mb-3 text-yellow-300">⚠️ PELANGGARAN TERDETEKSI!</h2>
-      <p class="text-base mb-4">Anda terdeteksi **berpindah tab, meminimalkan browser, atau membagi layar 2**. Sesuai aturan CBT MTsN 2 Probolinggo, pengerjaan Anda ditunda selama 20 menit.</p>
+      <p class="text-base mb-4">Anda terdeteksi berpindah tab, meminimalkan browser, atau membagi layar. Sesuai aturan CBT MTsN 2 Probolinggo, pengerjaan Anda ditunda selama 20 menit.</p>
       <div class="bg-black bg-opacity-40 rounded-xl p-4 mb-4">
         <p class="text-xs uppercase tracking-wider text-gray-300">Waktu Penundaan (Bisa lanjut setelah):</p>
         <span id="penaltyTimer" class="text-5xl font-mono font-bold text-yellow-400">20:00</span>
@@ -30,7 +30,10 @@
     <!-- 1. HALAMAN LOGIN -->
     <div id="loginView" class="max-w-md mx-auto mt-16 bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
       <div class="text-center mb-6">
-        <img src="logo.png" alt="Logo MTsN 2 Probolinggo" class="w-20 h-20 mx-auto mb-3 object-contain">
+        <!-- LOGO UTAMA DENGAN FALLBACK LINGKARAN HIJAU -->
+        <img src="logo.png" alt="Logo MTsN 2 Probolinggo" class="w-20 h-20 mx-auto mb-3 object-contain" onerror="this.style.display='none'; document.getElementById('altLogo').style.display='flex';">
+        <div id="altLogo" class="hidden w-16 h-16 bg-emerald-600 text-white rounded-full items-center justify-center mx-auto mb-3 font-bold text-xl">MTs</div>
+        
         <h1 class="text-xl font-bold text-gray-800">CBT SELEKSI REKRUTMEN</h1>
         <p class="text-sm text-gray-500">Cleaning Service & Kebun MTsN 2 Probolinggo</p>
       </div>
@@ -314,7 +317,7 @@
       { q: "Saat menyapu tangga kantor, arah menyapu yang benar dan aman adalah...", opts: ["Dari anak tangga paling bawah ke atas", "Dari anak tangga paling atas ke bawah secara bertahap sambil berdiri di posisi aman", "Acak saja", "Dari tengah ke samping"], key: "B" },
       { q: "Alat keselamatan K3 yang wajib dipakai saat menangani bahan kimia pembersih bersifat asam keras adalah...", opts: ["Sarung tangan karet (rubber gloves) dan masker", "Sarung tangan kain tipis", "Tanpa sarung tangan", "Topi saja"], key: "A" },
       { q: "Cara mencegah genangan air dan bahaya terpeleset di area lobby saat hujan deras adalah...", opts: ["Menutup pintu masuk lobby", "Memasang keset penyerap (entrance matting) dan menyiapkan papan peringatan lantai licin", "Membiarkan air menggenang", "Menyiram air deterjen"], key: "B" },
-      { q: "Penggunaan kain pel (mop) microfiber lebih disukai daripada kain pel katun biasa karena...", opts: ["Harganya lebih murah", "Mampu mengangkat debu halus dan kuman lebih efektif serta cepat kering", "Berat saat basah", "Mudah robek"], key: "B" },
+      { q: "Penggunaan kain pel (mop) microfiber lebih disukai daripada kain pel katun biasa karena...", opts: ["Harganya lebih murah", "Mable mengangkat debu halus dan kuman lebih efektif serta cepat kering", "Berat saat basah", "Mudah robek"], key: "B" },
       { q: "Apa yang harus dilakukan jika tempat penyimpanan chemical di gudang tidak memiliki ventilasi udara?", opts: ["Biarkan saja pintu gudang tertutup rapat", "Lapor ke atasan agar diberi ventilasi untuk mencegah penumpukan uap kimia berbahaya", "Menyimpan bahan kimia di bawah meja kerja karyawan", "Membakar bahan kimia"], key: "B" },
       { q: "Mengapa botol spray chemical pembersih wajib diberi stiker/label nama cairan?", opts: ["Agar terlihat bagus", "Mencegah salah penggunaan chemical yang bisa merusak permukaan atau membahayakan petugas", "Hanya formalitas", "Agar tidak diambil orang"], key: "B" },
       { q: "Pengkilap daun (leaf shine) sebaiknya tidak digunakan pada tanaman hias indoor secara berlebihan karena...", opts: ["Daun akan tumbuh cepat", "Dapat menyumbat pori-pori daun (stomata) dan mengganggu pernapasan tanaman", "Tanaman akan berubah warna menjadi merah", "Membuat tanah busuk"], key: "B" },
@@ -492,23 +495,19 @@
       }, 1000);
     }
 
-    // ANTI KECURANGAN (20 MENIT PENUNDAAN)
+    // ANTI KECURANGAN PERBAIKAN HP & LAPTOP
     function setupAntiCheat() {
+      // 1. Deteksi Pindah Tab / Pindah Aplikasi (Akurat & Aman di HP & Laptop)
       document.addEventListener("visibilitychange", () => {
         if (document.hidden && currentUser && currentUser.role === "peserta") {
           triggerPenalty();
         }
       });
 
-      window.addEventListener("blur", () => {
-        if (currentUser && currentUser.role === "peserta") {
-          triggerPenalty();
-        }
-      });
-
+      // 2. Deteksi Split Screen (Hanya jika perubahan lebar jendela ekstrem > 250px di Laptop)
       window.addEventListener("resize", () => {
         if (currentUser && currentUser.role === "peserta") {
-          if (Math.abs(window.innerWidth - initialWindowWidth) > 200 || window.innerWidth < 700) {
+          if (Math.abs(window.innerWidth - initialWindowWidth) > 250) {
             triggerPenalty();
           }
         }
